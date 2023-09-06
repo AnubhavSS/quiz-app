@@ -1,0 +1,1 @@
+export const Rules=[' For each correct answer you get 5 points','  There is no negative marking for wrong answer',' Each question has a time limit of 15 sec','   You should answer all the questions compulsarily']
