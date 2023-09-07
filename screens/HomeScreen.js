@@ -26,7 +26,7 @@ const HomeScreen = () => {
   keyExtractor={(item) => item}
 />
 
-<Pressable style={styles.quizStartBtn} onPress={()=>navigation.navigate('Quiz')}>
+<Pressable style={styles.quizStartBtn} onPress={()=>navigation.navigate('QuizChoice')}>
     <Text style={styles.quizStartBtnText}>Start Quiz</Text>
 </Pressable>
 
