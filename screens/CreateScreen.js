@@ -1,14 +1,14 @@
 import { View, TextInput, Button, Text, StyleSheet,Alert } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import React from 'react'
+import { useNavigation } from '@react-navigation/native';
 
 
 const CreateScreen = () => {
-
+const navigation=useNavigation()
     const { control, handleSubmit } = useForm();
 
-    const onSubmit = (data) => {
-    Alert.alert(data)
+    const onSubmit = (data) => {navigation.navigate('AddQues',{data})
       // Here you can perform further actions with the form data, like sending it to a server
     };
   
@@ -21,10 +21,11 @@ const CreateScreen = () => {
     <Controller
       control={control}
       name="quizName"
-    //  rules={{required:true}}
-      render={({ field }) => (
+     rules={{required:true}}
+      render={({ field: { onChange,value }}) => (
         <TextInput
-          {...field}
+          value={value}
+          onChangeText={onChange}
           style={styles.input}
           placeholder="Enter Quiz Name"
           // Add other TextInput props as needed
@@ -39,12 +40,14 @@ const CreateScreen = () => {
     <Controller
       control={control}
       name="timer"
-     // rules={{required:true}}
-      render={({ field }) => (
+      rules={{required:true}}
+      render={({ field: { onChange,value }}) => (
         <TextInput
-          {...field}
+        value={value}
+          onChangeText={onChange}
           style={styles.input}
           placeholder="Enter timer duration"
+          
           // Add other TextInput props as needed
         />
       )}
@@ -57,10 +60,11 @@ const CreateScreen = () => {
     <Controller
       control={control}
       name="grading"
-     // rules={{required:true}}
-      render={({ field }) => (
+      rules={{required:true}}
+      render={({ field: { onChange,value } }) => (
         <TextInput
-          {...field}
+        value={value}
+        onChangeText={onChange}
           style={styles.input}
           placeholder="Enter points for correct answer"
           // Add other TextInput props as needed
