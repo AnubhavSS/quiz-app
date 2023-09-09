@@ -53,7 +53,7 @@ export default [
 
     },
     {
-        question: "what is 5X5",
+        question: "what is 5 x 5",
         options:[
             {
                 id:"0",

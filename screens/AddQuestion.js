@@ -2,9 +2,11 @@ import { StyleSheet, Text, View ,TextInput,Pressable} from 'react-native'
 import React,{useState} from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { useForm, Controller } from 'react-hook-form';
-
+import { collection, addDoc } from "firebase/firestore"; 
+import { db } from '../firebaseConfig';
 const AddQuestion = () => {
     const route=useRoute()
+ 
     const navigation=useNavigation()
     const [questionNo, setquestionNo] = useState(1)
     const { control, handleSubmit,reset } = useForm({ defaultValues: {
@@ -16,18 +18,15 @@ const AddQuestion = () => {
         correctAnswer: '',
       }});
 
-    const onSubmit = (data) => {
-      let quizData=[]
-         reset()
-    setquestionNo(prev=>prev+1)
+    const onSubmit =async (data) => {
    
     const { [ `question${questionNo}` ]: questionValue,correctAnswer,option1,option2,option3,option4 } = data;
     const values={
-      grading:route?.params?.data?.grading,
-      quizName:route?.params?.data?.quizName,
-      timer:route?.params?.data?.timer,
+      // grading:route?.params?.data?.grading,
+      // quizName:route?.params?.data?.quizName,
+      // timer:route?.params?.data?.timer,
       question:questionValue,
-      correctAnswer:correctAnswer-1,
+      correctAnswerIndex:correctAnswer-1,
       options:[
         {
         id:0,
@@ -51,19 +50,27 @@ const AddQuestion = () => {
       },
     ]
     }
+  
+// Add a new document with a generated id.
+const quizName = route.params?.data?.quizName;
 
-if(questionNo>5)
-{
+if (quizName) {
+  // quizName is not empty, proceed to create the collection reference
+  const docRef = await addDoc(collection(db, quizName), {
+   correctAnswerIndex:values.correctAnswerIndex,
+   options:values.options,
+   question:values.question
+  });
+} else {
+  console.error('quizName is empty or undefined');
+}
 
-}
-else
-{
-  quizData.push(values)
-}
-    
+   
+    reset()
+    setquestionNo(prev=>prev+1)
     };
     // console.log(route.params)
-
+   if( questionNo>5 ){navigation.navigate('Home') }
     
   return (
     <View style={{ margin: 25 }}>
@@ -189,7 +196,7 @@ else
 
 <Pressable
   style={styles.button}
-  onPress={questionNo> 5 ? navigation.navigate('Home') : handleSubmit(onSubmit)}
+  onPress={ handleSubmit(onSubmit)}
 >
   <Text style={styles.text}>{questionNo === 5 ? "Submit" : "Next"}</Text>
 </Pressable>

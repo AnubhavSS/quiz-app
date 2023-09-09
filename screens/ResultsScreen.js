@@ -7,6 +7,7 @@ const ResultsScreen = () => {
 const navigation=useNavigation()
     const route=useRoute()
    
+   
   return (
     <View style={{ marginTop: 15 }}>
     <View

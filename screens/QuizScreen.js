@@ -1,16 +1,22 @@
 import { StyleSheet, Text, View, Pressable } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import questions from '../data/questions'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
 import { AntDesign } from '@expo/vector-icons';
+import { collection, getDocs } from "firebase/firestore";
+import { db } from '../firebaseConfig';
+
 
 const QuizScreen = () => {
     const navigation = useNavigation()
-    const data = questions;
+  const route=useRoute()
+ 
    
-    const totalQuestions = data.length;
+  const [quizInfo, setquizInfo] = useState({})
     // points
     const [points, setPoints] = useState(0);
+
+    const [data, setData] = useState([])
 
     // index of the question
     const [index, setIndex] = useState(0);
@@ -25,14 +31,51 @@ const QuizScreen = () => {
     const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
 
     // Counter
-    const [counter, setCounter] = useState(10);
+    const [counter, setCounter] = useState(null);
 
     let interval = null
 
+    const fetch = async () => {
+        try {
+          const querySnapshot = await getDocs(collection(db, route?.params?.quizName));
+          const newData = [];
+          let quizInfoData = null;
+    
+          querySnapshot.forEach((doc) => {
+            if (doc.id === 'info') {
+              quizInfoData = doc.data();
+            } else {
+              newData.push(doc.data());
+            }
+          });
+    
+          setData(newData);
+    
+          // Now that we have quizInfoData, update the counter
+          if (quizInfoData) {
+            setquizInfo(quizInfoData);
+            setCounter(quizInfoData.timer);
+       
+          }
+        } catch (error) {
+          // Handle any potential errors here
+          console.error("Error fetching data:", error);
+        }
+      }
+    
+      useEffect(() => {
+        fetch();
+      }, []); // Empty dependency array to run the effect only once
+
+     
+      const totalQuestions = data && data?.length;
+
     useEffect(() => {
+
+        // console.log(selectedAnswerIndex,currentQuestion?.correctAnswerIndex,selectedAnswerIndex === currentQuestion?.correctAnswerIndex)
         if (selectedAnswerIndex !== null) {
             if (selectedAnswerIndex === currentQuestion?.correctAnswerIndex) {
-                setPoints((points) => points + 10);
+                setPoints((points) => points + quizInfo?.grading);
                 setAnswerStatus(true);
                 answers.push({ question: index + 1, answer: true });
             } else {
@@ -54,7 +97,7 @@ const QuizScreen = () => {
             }
             if (counter === 0) {
                 setIndex((index + 1));
-                setCounter(10);
+                setCounter(quizInfo?.timer);
             }
         };
 
@@ -67,7 +110,8 @@ const QuizScreen = () => {
     }, [counter]);
 
       useEffect(() => {
-        if (index+1 > data.length) {
+     
+        if (index+1 > 5) {
           clearTimeout(interval)
           navigation.navigate("Results", {
             answers: answers,
@@ -78,14 +122,14 @@ const QuizScreen = () => {
 
     useEffect(() => {
         if (!interval) {
-            setCounter(10);
+            setCounter(quizInfo?.timer);
         }
     }, [index]);
     
-    const currentQuestion = data[index]
+    const currentQuestion =data && data[index]
      // progress bar
   const progressPercentage = Math.floor((index/totalQuestions) * 100);
-
+// console.log(selectedAnswerIndex,currentQuestion.correctAnswer)
     return (
         <View style={{ marginTop: 15 }}>
 
@@ -109,7 +153,7 @@ const QuizScreen = () => {
                 <Text style={styles.question}>{  currentQuestion?.question}</Text>
                 <View style={{ marginTop: 12 }}>
                     {
-                        currentQuestion?.options.map((item, index) =>
+                        currentQuestion?.options?.map((item, index) =>
                             <Pressable onPress={() => selectedAnswerIndex === null && setSelectedAnswerIndex(index)} key={index} style={selectedAnswerIndex === index &&
                                 index === currentQuestion.correctAnswerIndex
                                 ? styles.success : selectedAnswerIndex != null && selectedAnswerIndex === index ? styles.fail : styles.answerCard}>

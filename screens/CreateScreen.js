@@ -2,14 +2,26 @@ import { View, TextInput, Button, Text, StyleSheet,Alert } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import React from 'react'
 import { useNavigation } from '@react-navigation/native';
-
+import { collection,setDoc,doc,addDoc} from "firebase/firestore"; 
+import { db } from '../firebaseConfig';
 
 const CreateScreen = () => {
 const navigation=useNavigation()
     const { control, handleSubmit } = useForm();
 
-    const onSubmit = (data) => {navigation.navigate('AddQues',{data})
-      // Here you can perform further actions with the form data, like sending it to a server
+    const onSubmit = async (data) => {
+      try {
+        // Use 'collection' for the quizName and 'doc' for 'info' within that collection
+        const docRef = doc(collection(db, data?.quizName), 'info');
+        await setDoc(docRef, data);
+
+        const docss=addDoc(collection(db,"QuizNames"),{
+         [ data?.quizName]: data?.quizName
+        })
+        navigation.navigate('AddQues', { data });
+      } catch (error) {
+        console.error('Error creating document:', error);
+      }
     };
   
   return (

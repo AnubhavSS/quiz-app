@@ -1,18 +1,53 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { Pressable, StyleSheet, Text, View,FlatList } from 'react-native'
+import React,{useEffect,useState} from 'react'
 import { useNavigation } from '@react-navigation/native'
+
+import { collection, getDocs } from "firebase/firestore";
+import { db } from '../firebaseConfig';
 
 const QuizChoice = () => {
 
+  const [data, setData] = useState([])
+  const fetch = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "QuizNames"));
+      const newData = [];
+      querySnapshot.forEach((doc) => {
+          newData.push(doc.data());
+      });
+
+      setData(newData);
+
+    } catch (error) {
+      // Handle any potential errors here
+      console.error("Error fetching data:", error);
+    }
+  }
+
+  useEffect(() => {
+    fetch();
+  }, []); // Empty dependency array to run the effect only once
+
   const navigation=useNavigation()
+
   return (
     <View style={styles.container}>
+      {console.log(data)}
       <Text style={styles.quizHeading}>QuizChoice</Text>
-
-<Pressable style={styles.card} onPress={()=>navigation.navigate('Quiz')}>
-  <Text numberOfLines={3} ellipsizeMode='tail' style={styles.quizName}>Quiz 1</Text>
-</Pressable>
-
+      
+      <View style={{margin:5,padding:5}}>
+      <FlatList
+  data={data}
+  contentContainerStyle={{flexDirection : "row", flexWrap : "wrap"}} 
+  keyExtractor={(item, index) => index.toString()}
+  renderItem={({ item }) => (
+    <Pressable style={styles.card} onPress={() => navigation.navigate('Quiz',{quizName:Object.keys(item)[0]})}>
+      <Text numberOfLines={3} ellipsizeMode='tail' style={styles.quizName}>
+        {Object.keys(item)[0]}
+      </Text>
+    </Pressable>
+  )}
+/></View>
     </View>
   )
 }
@@ -40,6 +75,7 @@ card:{
   borderRadius:10,
   justifyContent:'center',
   alignItems:'center',
+  margin:10
 },
 quizName:{
   fontSize:30,
