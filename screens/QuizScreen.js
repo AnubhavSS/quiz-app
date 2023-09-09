@@ -75,7 +75,7 @@ const QuizScreen = () => {
         // console.log(selectedAnswerIndex,currentQuestion?.correctAnswerIndex,selectedAnswerIndex === currentQuestion?.correctAnswerIndex)
         if (selectedAnswerIndex !== null) {
             if (selectedAnswerIndex === currentQuestion?.correctAnswerIndex) {
-                setPoints((points) => points + quizInfo?.grading);
+                setPoints((points) => points + parseInt(quizInfo?.grading));
                 setAnswerStatus(true);
                 answers.push({ question: index + 1, answer: true });
             } else {
@@ -129,7 +129,7 @@ const QuizScreen = () => {
     const currentQuestion =data && data[index]
      // progress bar
   const progressPercentage = Math.floor((index/totalQuestions) * 100);
-// console.log(selectedAnswerIndex,currentQuestion.correctAnswer)
+
     return (
         <View style={{ marginTop: 15 }}>
 
